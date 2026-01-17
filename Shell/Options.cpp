@@ -599,6 +599,12 @@ void Options::init()
     _lookup.insert(&_sineSelection);
     _sineSelection.tag(OptionTag::PREPROCESSING);
 
+    _sineStrategy = ChoiceOptionValue<SineStrategy>("sine_strategy", "sst", SineStrategy::CLASSIC, {"classic", "kmin", "softmin"});
+    _sineStrategy.description=
+    "Selects the strategy used to select formulas based on the SInE D-relation";
+    _lookup.insert(&_sineStrategy);
+    _sineStrategy.tag(OptionTag::PREPROCESSING);
+
     _sineTolerance = FloatOptionValue("sine_tolerance","st",1.0);
     _sineTolerance.description="SInE tolerance parameter (sometimes referred to as 'benevolence')."
     " Has special value of -1.0 (which effectively codes +infinity), but otherwise must be greater or equal 1.0."

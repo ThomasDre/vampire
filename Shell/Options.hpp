@@ -570,6 +570,12 @@ public:
     OFF = 2
   };
 
+  enum class SineStrategy : unsigned int {
+    CLASSIC = 0,
+    KMIN = 1,
+    SOFTMIN = 2
+  };
+
   enum class Proof : unsigned int {
     OFF = 0,
     ON = 1,
@@ -2219,7 +2225,9 @@ public:
   unsigned sineGeneralityThreshold() const { return _sineGeneralityThreshold.actualValue; }
   unsigned sineToAgeGeneralityThreshold() const { return _sineToAgeGeneralityThreshold.actualValue; }
   SineSelection sineSelection() const { return _sineSelection.actualValue; }
+  SineStrategy sineStrategy() const { return _sineStrategy.actualValue; }
   void setSineSelection(SineSelection val) { _sineSelection.actualValue=val; }
+  void setSineStrategy(SineStrategy val) { _sineStrategy.actualValue=val; }
   float sineTolerance() const { return _sineTolerance.actualValue; }
   float sineToAgeTolerance() const { return _sineToAgeTolerance.actualValue; }
 
@@ -2631,6 +2639,7 @@ private:
   UnsignedOptionValue _sineGeneralityThreshold;
   UnsignedOptionValue _sineToAgeGeneralityThreshold;
   ChoiceOptionValue<SineSelection> _sineSelection;
+  ChoiceOptionValue<SineStrategy> _sineStrategy;
   FloatOptionValue _sineTolerance;
   FloatOptionValue _sineToAgeTolerance;
   ChoiceOptionValue<Sos> _sos;
