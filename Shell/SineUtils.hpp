@@ -19,6 +19,7 @@
 
 #include "Lib/DArray.hpp"
 #include "Lib/Stack.hpp"
+#include <queue>
 
 namespace Shell {
 
@@ -66,7 +67,7 @@ class SineSelector
 {
 public:
   SineSelector(const Options& opt);
-  SineSelector(bool onIncluded, float tolerance, unsigned depthLimit,
+  SineSelector(bool onIncluded, unsigned kmin, float tolerance, unsigned depthLimit,
       unsigned genThreshold=0, bool justForSineLevels=false);
 
   bool perform(UnitList*& units); // returns true iff removed something
@@ -85,6 +86,7 @@ private:
 
   bool _onIncluded;
   bool _strict;
+  unsigned _kmin;
   unsigned _genThreshold;
   float _tolerance;
   unsigned _depthLimit;

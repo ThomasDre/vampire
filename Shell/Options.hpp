@@ -2215,6 +2215,7 @@ public:
   bool splitting() const { return _splitting.actualValue; }
   void setSplitting(bool value){ _splitting.actualValue=value; }
   bool nonliteralsInClauseWeight() const { return _nonliteralsInClauseWeight.actualValue; }
+  unsigned sineKmin() const { return _sineKmin.actualValue; }
   unsigned sineDepth() const { return _sineDepth.actualValue; }
   unsigned sineGeneralityThreshold() const { return _sineGeneralityThreshold.actualValue; }
   unsigned sineToAgeGeneralityThreshold() const { return _sineToAgeGeneralityThreshold.actualValue; }
@@ -2627,6 +2628,7 @@ private:
   BoolOptionValue _useACeval;
   TimeLimitOptionValue _simulatedTimeLimit;
   FloatOptionValue _lrsEstimateCorrectionCoef;
+  UnsignedOptionValue _sineKmin;
   UnsignedOptionValue _sineDepth;
   UnsignedOptionValue _sineGeneralityThreshold;
   UnsignedOptionValue _sineToAgeGeneralityThreshold;

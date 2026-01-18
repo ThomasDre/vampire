@@ -574,6 +574,16 @@ void Options::init()
     _lookup.insert(&_ignoreUnrecognizedLogic);
     _ignoreUnrecognizedLogic.tag(OptionTag::INPUT);
 
+    _sineKmin = UnsignedOptionValue("sine_kmin","sk",1);
+    _sineKmin.description=
+    "Number of least general symbols of a unit that need to be in the D-relation";
+    _lookup.insert(&_sineKmin);
+    _sineKmin.tag(OptionTag::PREPROCESSING);
+    // Captures that if the value is not 1 then sineSelection must be on
+    _sineKmin.onlyUsefulWith(_sineSelection.is(notEqual(SineSelection::OFF)));
+    // Captures that if the value is not default then sineTolerance must be equal to 1.0
+    _sineKmin.onlyUsefulWith(_sineTolerance.is(equal(1.0f)));
+
     _sineDepth = UnsignedOptionValue("sine_depth","sd",0);
     _sineDepth.description=
     "Limit number of iterations of the transitive closure algorithm that selects formulas based on SInE's D-relation (see SInE description). 0 means no limit, 1 is a maximal limit (least selected axioms), 2 allows two iterations, etc...";

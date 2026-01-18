@@ -259,6 +259,7 @@ void SineBase::initGeneralityFunction(UnitList* units)
 
 SineSelector::SineSelector(const Options& opt)
 : _onIncluded(opt.sineSelection()==Options::SineSelection::INCLUDED),
+  _kmin(opt.sineKmin()),
   _genThreshold(opt.sineGeneralityThreshold()),
   _tolerance(opt.sineTolerance()),
   _depthLimit(opt.sineDepth()),
@@ -267,8 +268,9 @@ SineSelector::SineSelector(const Options& opt)
   init();
 }
 
-SineSelector::SineSelector(bool onIncluded, float tolerance, unsigned depthLimit, unsigned genThreshold, bool justForSineLevels)
+SineSelector::SineSelector(bool onIncluded, unsigned kmin, float tolerance, unsigned depthLimit, unsigned genThreshold, bool justForSineLevels)
 : _onIncluded(onIncluded),
+  _kmin(kmin),
   _genThreshold(genThreshold),
   _tolerance(tolerance),
   _depthLimit(depthLimit),
@@ -300,11 +302,13 @@ void SineSelector::updateDefRelation(Unit* u)
     return;
   }
 
+  static queue<Stack<SymId>> kminGeneralities;
   static Stack<SymId> equalGenerality;
   equalGenerality.reset();
 
   SymId leastGenSym=sit.next();
   unsigned leastGenVal=_gen[leastGenSym];
+  equalGenerality.push(leastGenSym);
 
   //it a symbol fits under _genThreshold, add it immediately [into the relation]
   if (leastGenVal<=_genThreshold) {
@@ -324,7 +328,13 @@ void SineSelector::updateDefRelation(Unit* u)
     if (val<leastGenVal) {
       leastGenSym=sym;
       leastGenVal=val;
-      equalGenerality.reset();
+      kminGeneralities.push(equalGenerality);
+      equalGenerality = Stack<SymId>();
+      equalGenerality.push(sym);
+
+      if (kminGeneralities.size() > _kmin) {
+        kminGeneralities.pop();
+      }
     } else if (val==leastGenVal) {
       equalGenerality.push(sym);
     }
@@ -334,9 +344,12 @@ void SineSelector::updateDefRelation(Unit* u)
   if (_strict) {
     //only if the least general symbol is over _genThreshold; otherwise it is already added
     if (leastGenVal>_genThreshold) {
-      UnitList::push(u,_def[leastGenSym]);
-      while (equalGenerality.isNonEmpty()) {
-        UnitList::push(u,_def[equalGenerality.pop()]);
+      for (unsigned i=0; i<kminGeneralities.size(); i++) {
+        Stack<SymId> kthEqualGenerality = kminGeneralities.front();
+        kminGeneralities.pop();
+        while (kthEqualGenerality.isNonEmpty()) {
+          UnitList::push(u,_def[kthEqualGenerality.pop()]);
+        }
       }
     }
   }
@@ -350,12 +363,12 @@ void SineSelector::updateDefRelation(Unit* u)
     if (generalityLimit>_genThreshold) {
       sit=_symExtr.extractSymIds(u);
       while (sit.hasNext()) {
-	SymId sym=sit.next();
-	unsigned val=_gen[sym];
-	//only if the symbol is over _genThreshold; otherwise it is already added
-	if (val>_genThreshold && val<=generalityLimit) {
-	  UnitList::push(u,_def[sym]);
-	}
+	      SymId sym=sit.next();
+	      unsigned val=_gen[sym];
+	      //only if the symbol is over _genThreshold; otherwise it is already added
+	      if (val>_genThreshold && val<=generalityLimit) {
+	        UnitList::push(u,_def[sym]);
+	      }
       }
     }
   }
