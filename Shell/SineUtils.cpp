@@ -306,9 +306,12 @@ void SineSelector::updateDefRelation(Unit* u)
   static Stack<SymId> equalGenerality;
   equalGenerality.reset();
 
+  queue<SymId> kminLeastGenSym;
   SymId leastGenSym=sit.next();
+  kminLeastGenSym.push(leastGenSym);
+  queue<unsigned> kminleastGenVal;
   unsigned leastGenVal=_gen[leastGenSym];
-  equalGenerality.push(leastGenSym);
+  kminleastGenVal.push(leastGenVal);
 
   //it a symbol fits under _genThreshold, add it immediately [into the relation]
   if (leastGenVal<=_genThreshold) {
@@ -328,25 +331,41 @@ void SineSelector::updateDefRelation(Unit* u)
     if (val<leastGenVal) {
       leastGenSym=sym;
       leastGenVal=val;
+      kminLeastGenSym.push(leastGenSym);
+      kminleastGenVal.push(leastGenVal);
       kminGeneralities.push(equalGenerality);
       equalGenerality = Stack<SymId>();
-      equalGenerality.push(sym);
 
       if (kminGeneralities.size() > _kmin) {
         kminGeneralities.pop();
+        kminLeastGenSym.pop();
+        kminleastGenVal.pop();
       }
     } else if (val==leastGenVal) {
       equalGenerality.push(sym);
     }
   }
 
+  // Add the final least general symbol and its equal generality group to the queues
+  kminGeneralities.push(equalGenerality);
+  if (kminGeneralities.size() > _kmin) {
+    kminGeneralities.pop();
+    kminLeastGenSym.pop();
+    kminleastGenVal.pop();
+  }
 
   if (_strict) {
     //only if the least general symbol is over _genThreshold; otherwise it is already added
-    if (leastGenVal>_genThreshold) {
-      for (unsigned i=0; i<kminGeneralities.size(); i++) {
-        Stack<SymId> kthEqualGenerality = kminGeneralities.front();
-        kminGeneralities.pop();
+    for (unsigned i=0; i<kminGeneralities.size(); i++) {
+      unsigned kthLeastGenVal = kminleastGenVal.front();
+      kminleastGenVal.pop();
+      SymId kthLeastGenSym = kminLeastGenSym.front();
+      kminLeastGenSym.pop();
+      Stack<SymId> kthEqualGenerality = kminGeneralities.front();
+      kminGeneralities.pop();
+      
+      if (kthLeastGenVal>_genThreshold) {
+        UnitList::push(u,_def[kthLeastGenSym]);
         while (kthEqualGenerality.isNonEmpty()) {
           UnitList::push(u,_def[kthEqualGenerality.pop()]);
         }
